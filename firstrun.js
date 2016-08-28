@@ -15,6 +15,19 @@ var fs = require("fs");
 var readline = require("readline");
 var google = require("googleapis");
 var googleAuth = require("google-auth-library");
+var argv = require("yargs")
+  .option({
+     // Client secret file
+    "SecretClientId": {string: true, default: ""}, 
+    "SecretProjectId": {string: true, default: ""},
+    "SecretAuthUri": {string: true, default: ""}, 
+    "SecretTokenUri": {string: true, default: ""}, 
+    "SecretAuthProvider": {string: true, default: ""}, 
+    "SecretClientSecret": {string: true, default: ""}, 
+    "SecretRedirectUris": {array: true, default: null},
+  })
+  .argv;
+
 
 
 /* ====================
@@ -34,20 +47,36 @@ var TOKEN_PATH = TOKEN_DIR + "calendar-api.json";
  * Let's get started!
  * =================== */
 
-/* Load client secrets from a local file. */
-fs.readFile("client_secret.json", function processClientSecrets(err, content) {
-  if (err) {
-    console.log('Error loading client secret file: ' + err);
-    return;
-  }
-  if (content == "") {
-    console.log('Error loading client secret file: file is empty.');
-    return;
-  }
-  // Authorize a client with the loaded credentials, then call the Google Calendar API.
-  authorize(JSON.parse(content), testAuth);
-})
+/* Check if all parameters are set, use these to authorize instead of the file */
+var CLIENT_SECRET;
+if(argv.SecretClientId != "" && argv.SecretProjectId != "" && argv.SecretAuthUri != "" && argv.SecretTokenUri != "" && argv.SecretAuthProvider != ""  && argv.SecretClientSecret != "" && argv.SecretRedirectUris != null) {
+    CLIENT_SECRET.web.client_id = argv.SecretClientId;
+    CLIENT_SECRET.web.project_id = argv.SecretProjectId;
+    CLIENT_SECRET.web.auth_uri = argv.SecretAuthUri;
+    CLIENT_SECRET.web.token_uri = argv.SecretTokenUri;
+    CLIENT_SECRET.web.auth_provider_x509_cert_url = argv.SecretAuthProvider;
+    CLIENT_SECRET.web.client_secret = argv.SecretClientSecret;
+    CLIENT_SECRET.web.redirect_uris = argv.SecretRedirectUris;
 
+    console.log("Using the parameters to authorize.");
+    authorize(CLIENT_SECRET, testAuth);
+} else {
+
+  /* Load client secrets from a local file. */
+  fs.readFile("client_secret.json", function processClientSecrets(err, content) {
+    if (err) {
+      console.log('Error loading client secret file: ' + err);
+      return;
+    }
+    if (content == "") {
+      console.log('Error loading client secret file: file is empty.');
+      return;
+    }
+    // Authorize a client with the loaded credentials, then call the Google Calendar API.
+    authorize(JSON.parse(content), testAuth);
+  })
+
+}
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
