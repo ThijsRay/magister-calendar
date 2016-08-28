@@ -17,7 +17,8 @@
     "util": "0.10.x",
     "googleapis": "2.1.x",
     "google-auth-library": "0.9.x",
-    "request": "2.65.x"
+    "request": "2.65.x",
+    "yargs": "5.0.x"
   },
   "repository": {
     "type": "git",
