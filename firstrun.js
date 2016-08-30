@@ -18,13 +18,9 @@ var googleAuth = require("google-auth-library");
 var argv = require("yargs")
   .option({
      // Client secret file
-    "SecretClientId": {string: true, default: ""}, 
-    "SecretProjectId": {string: true, default: ""},
-    "SecretAuthUri": {string: true, default: ""}, 
-    "SecretTokenUri": {string: true, default: ""}, 
-    "SecretAuthProvider": {string: true, default: ""}, 
-    "SecretClientSecret": {string: true, default: ""}, 
-    "SecretRedirectUris": {array: true, default: null},
+    "TokenPath": {string: true, default: (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE) + "/.credentials/calendar-api.json"},
+    "TokenDir": {string: true, default: (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE) + "/.credentials/"},
+    "ClientPath": {string: true, default: "client_secret.json"}
   })
   .argv;
 
@@ -38,32 +34,16 @@ var SCOPES = [
   "https://www.googleapis.com/auth/calendar.readonly",
   "https://www.googleapis.com/auth/calendar"
 ];
-var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-    process.env.USERPROFILE) + "/.credentials/";
-var TOKEN_PATH = TOKEN_DIR + "calendar-api.json";
+var TOKEN_DIR = argv.TokenDir;
+var TOKEN_PATH = argv.TokenPath;
 
 
 /* ===================
  * Let's get started!
  * =================== */
 
-/* Check if all parameters are set, use these to authorize instead of the file */
-var CLIENT_SECRET;
-if(argv.SecretClientId != "" && argv.SecretProjectId != "" && argv.SecretAuthUri != "" && argv.SecretTokenUri != "" && argv.SecretAuthProvider != ""  && argv.SecretClientSecret != "" && argv.SecretRedirectUris != null) {
-    CLIENT_SECRET.web.client_id = argv.SecretClientId;
-    CLIENT_SECRET.web.project_id = argv.SecretProjectId;
-    CLIENT_SECRET.web.auth_uri = argv.SecretAuthUri;
-    CLIENT_SECRET.web.token_uri = argv.SecretTokenUri;
-    CLIENT_SECRET.web.auth_provider_x509_cert_url = argv.SecretAuthProvider;
-    CLIENT_SECRET.web.client_secret = argv.SecretClientSecret;
-    CLIENT_SECRET.web.redirect_uris = argv.SecretRedirectUris;
-
-    console.log("Using the parameters to authorize.");
-    authorize(CLIENT_SECRET, testAuth);
-} else {
-
   /* Load client secrets from a local file. */
-  fs.readFile("client_secret.json", function processClientSecrets(err, content) {
+  fs.readFile(argv.ClientPath, function processClientSecrets(err, content) {
     if (err) {
       console.log('Error loading client secret file: ' + err);
       return;

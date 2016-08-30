@@ -22,49 +22,18 @@ var argv = require("yargs")
 		// Global settings
 		"debug": {boolean: true, default: false},
 		"CachePath": {string: true, default: "cache/"},
-
-		// Config file 
-		"ConfigCalendar": {string: true, default: ""},
-		"ConfigPeriod": {string: true, default: ""},
-		"ConfigDayIsOverTime": {number: true, default: null},
-		"Url": {string: true, default: ""},
-		"Username": {string: true, default: ""},
-		"Password": {string: true, default: ""},
-		"PushoverEnabled": {boolean: true, default: false},
-		"PushoverToken": {string: true, default: ""},
-		"PushoverUser": {string: true, default: ""},
-		"PushoverDevice": {string: true, default: ""},
-		"RemoveCancelledClasses": {boolean: true, default: ""},
-		"Blacklist": {array: true, default: null},
-		"ReminderMethod": {string: true, default: ""},
-		"ReminderMinutes": {number: true, default: null},
-
-		 // Client secret file
-		"SecretClientId": {string: true, default: ""}, 
-		"SecretProjectId": {string: true, default: ""},
-		"SecretAuthUri": {string: true, default: ""}, 
-		"SecretTokenUri": {string: true, default: ""}, 
-		"SecretAuthProvider": {string: true, default: ""}, 
-		"SecretClientSecret": {string: true, default: ""}, 
-		"SecretRedirectUris": {array: true, default: null},
-
-		// Token file
-		"AccessToken": {string: true, default: "" },
-		"TokenType": {string: true, default: "" },
-		"RefreshToken": {string: true, default: "" },
-		"ExpiryDate": {number: true, default: null},
-		"UpdatedByMagcal": {boolean: true, default: true}
+		"TokenPath": {string: true, default: (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE) + "/.credentials/calendar-api.json"},
+		"ClientPath": {string: true, default: "client_secret.json"},
+		"ConfigPath": {string: true, default: "config.json"}
 	})
 	.argv;
 
 /* Set our settings. */
 var VERSION = "1.7.0";
 var DEBUG = argv.debug;
-var CONFIG_PATH = "config.json";
-var CLIENT_PATH = "client_secret.json";
-var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-    process.env.USERPROFILE) + "/.credentials/";
-var TOKEN_PATH = TOKEN_DIR + "/calender-api.json";
+var CONFIG_PATH = argv.ConfigPath;
+var CLIENT_PATH = argv.ClientPath;
+var TOKEN_PATH = argv.TokenPath;
 var CACHE_PATH = argv.CachePath;
 
 /* Say hello to our creator. */
@@ -90,38 +59,12 @@ fs.mkdir(CACHE_PATH, function(err) {
 
 /* Load the config.json file and override values with optional command line parameters. */
 var CONFIG = tools.loadJSONfile(CONFIG_PATH);
-if(argv.ConfigCalendar != "") { CONFIG.calendar = argv.ConfigCalendar; }
-if(argv.ConfigPeriod != "") { CONFIG.period = argv.ConfigPeriod; }
-if(argv.ConfigDayIsOverTime != null) { CONFIG.day_is_over_time = argv.ConfigDayIsOverTime; }
-if(argv.Url != "") { CONFIG.magister_url = argv.Url; }
-if(argv.Username != "") { CONFIG.magister_username = argv.Username; }
-if(argv.Password != ""){ CONFIG.magister_password = argv.Password; }
-if(argv.PushoverEnabled != false){ CONFIG.pushover.enabled = argv.PushoverEnabled; }
-if(argv.PushoverToken != ""){ CONFIG.pushover.token = argv.PushoverToken; }
-if(argv.PushoverUser != ""){ CONFIG.pushover.user = argv.PushoverUser; }
-if(argv.PushoverDevice != ""){ CONFIG.pushover.device = argv.PushoverDevice; }
-if(argv.RemoveCancelledClasses != ""){ CONFIG.remove_cancelled_classes = argv.RemoveCancelledClasses; }
-if(argv.Blacklist != null){ CONFIG.blacklist = argv.Blacklist; }
-if(argv.ReminderMethod != ""){ CONFIG.reminders.method = argv.ReminderMethod; }
-if(argv.ReminderMinutes != null){ CONFIG.reminders.minutes = argv.ReminderMinutes; }
 
 /* Load the client_secret.json file and override values with optional command line parameters. */
 var CLIENT_SECRET = tools.loadJSONfile(CLIENT_PATH);
-if(argv.SecretClientId != "") { CLIENT_SECRET.web.client_id = argv.SecretClientId; }
-if(argv.SecretProjectId != "") { CLIENT_SECRET.web.project_id = argv.SecretProjectId; }
-if(argv.SecretAuthUri != "") { CLIENT_SECRET.web.auth_uri = argv.SecretAuthUri; }
-if(argv.SecretTokenUri != "") { CLIENT_SECRET.web.token_uri = argv.SecretTokenUri; }
-if(argv.SecretAuthProvider != "") { CLIENT_SECRET.web.auth_provider_x509_cert_url = argv.SecretAuthProvider; }
-if(argv.SecretClientSecret != "") { CLIENT_SECRET.web.client_secret = argv.SecretClientSecret; }
-if(argv.SecretRedirectUris != null) { CLIENT_SECRET.web.redirect_uris = argv.SecretRedirectUris; }
 
 /* Load our access tokens and override values with optional command line parameters. */
 var TOKENS = tools.loadJSONfile(TOKEN_PATH);
-if(argv.AccessToken != ""){ TOKENS.access_token = argv.AccessToken; }
-if(argv.TokenType != ""){ TOKENS.token_type = argv.TokenType; }
-if(argv.RefreshToken != ""){ TOKENS.refresh_token = argv.RefreshToken; }
-if(argv.ExpiryDate != null){ TOKENS.expiry_date = argv.ExpiryDate; }
-if(argv.UpdatedByMagcal != true){ TOKENS.updated_by_magcal = argv.UpdatedByMagcal; }
 
 /* Set our Google configuration. */
 var GOOGLE_CONFIG = {
